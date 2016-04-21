@@ -1,6 +1,11 @@
 # Program Name: C--
 
 ------------------------------------------------
+Hey I uploaded a src, you can extract it and replace the src file
+you'd normally use for eclipse and it should run fine. All it is
+is the lolcode and its demo with keywords replaced with something more
+natural. 
+
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
 
