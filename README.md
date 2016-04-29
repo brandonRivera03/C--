@@ -19,6 +19,10 @@ I know I said I would change if statements to be better but in actuality it work
 Fixed an error I made for if and while: before it didn't allow for nested if or while loops, but now it should work.
 Also added scoping for if and while loops. Originally a declaration made in an if statement could carry over outside, now it can't, which is more correct. 
 
+I also added more functionality for them: conditionals can now take straight bool values, functions, or variables. Before it could only do something like while(true), if(this is less than that), and if(variable).
+
+Added and & or operators, function as normal bool operators.
+
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
 
