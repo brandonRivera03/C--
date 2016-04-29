@@ -19,10 +19,13 @@ class Cminusminus {
   case class ErrorPrintMany(num: Int, s: Vector[Any]) extends C_Line
   case class IfStatement(num: Int, fun: Function0[Boolean]) extends C_Line
   case class IfSymb(num: Int, sym: Symbol) extends C_Line
-  case class StartFalse(num: Int) extends C_Line
+  case class IfNormal(num: Int, s: Boolean) extends C_Line
+  case class ElseStatement(num: Int) extends C_Line
   case class EndIfStatement(num: Int) extends C_Line
   case class Assign(num: Int, fn: Function0[Unit]) extends C_Line
-  case class LoopBeg(bool: Boolean) extends C_Line
+  case class LoopBegStatement(num: Int, fun: Function0[Boolean]) extends C_Line
+  case class LoopBegSymb(num: Int, sym: Symbol) extends C_Line
+  case class LoopBegNormal(num: Int, bool: Boolean) extends C_Line
   case class BreakLoop() extends C_Line
   case class LoopEnd(loopBegLine: Int) extends C_Line
   case class FuncBeg(name: Symbol) extends C_Line
@@ -54,7 +57,7 @@ class Cminusminus {
   }
 
   def Else() = {
-    lines(current) = StartFalse(current)
+    lines(current) = ElseStatement(current)
     current += 1
   }
 
@@ -64,7 +67,6 @@ class Cminusminus {
   }
 
   /* General Assignment functions. */
-  
   case class Assignment(sym: Symbol) {
     def is(v: String): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
@@ -94,29 +96,62 @@ class Cminusminus {
   }
 
   /* Runtime Evaluation. */
-  
   private def gotoLine(line: Int) {
 
+    def GeneralWhile(bool: Boolean): Unit = {
+      /* If the conditional was true. */
+      if (bool) {
+        binds.newScope()
+        gotoLine(line + 1)
+      }
+      /* Go to end of loop. */
+      else {
+        binds.leaveScope()
+        var curLine = line
+        var advance = true
+        var cnt = 1
+        while (advance) {
+          curLine += 1
+          if (lines(curLine).isInstanceOf[LoopEnd]) {
+            cnt -= 1
+            if (cnt == 0)
+              advance = false
+          }
+          else if (lines(curLine).isInstanceOf[LoopBegStatement]
+                  || lines(curLine).isInstanceOf[LoopBegSymb]
+                  || lines(curLine).isInstanceOf[LoopBegNormal]) {
+            cnt += 1
+          }
+        }
+        gotoLine(curLine + 1)
+      }
+    }
+    
     def GeneralIf(bool: Boolean): Unit = {
       /* If the conditional was true. */
       if (bool) {  
         binds.newScope()
         gotoLine(line + 1)
       } 
-      /* Find next statement we need to run. */
+      /* Find next statement we need to run, if any. */
       else {       
         var curLine = line
         var advance = true
-        var cnt = 1  //Keep track of nested if statements
+        var cnt = 0  //Keep track of nested if statements
         while (advance) {
           curLine += 1
-          if (lines(curLine).isInstanceOf[EndIfStatement] 
-              || lines(curLine).isInstanceOf[StartFalse]) {
+          if (lines(curLine).isInstanceOf[EndIfStatement]) {
             cnt -= 1
-            if (cnt == 0)
+            if (cnt < 0)//Holds if there are no other nested else statements
               advance = false
           } 
-          else if (lines(curLine).isInstanceOf[IfStatement]) {
+          else if (lines(curLine).isInstanceOf[ElseStatement]) {
+            if (cnt == 0)//Holds if there are no nested else statements
+              advance = false
+          }
+          else if (lines(curLine).isInstanceOf[IfStatement]
+                  || lines(curLine).isInstanceOf[IfSymb]
+                  || lines(curLine).isInstanceOf[IfNormal]) {
             cnt += 1
           }
         }
@@ -192,8 +227,11 @@ class Cminusminus {
       case IfSymb(_, sym: Symbol) => {
         GeneralIf(binds.any(sym).asInstanceOf[Boolean])
       }
-
-      case StartFalse(_) => {
+      
+      case IfNormal(_, bool: Boolean) => {
+        GeneralIf(bool)
+      }
+      case ElseStatement(_) => {
         var curLine = line
         while (!lines(curLine).isInstanceOf[EndIfStatement]) {
           curLine = curLine + 1;
@@ -211,15 +249,16 @@ class Cminusminus {
           fn()
           gotoLine(line + 1)
         }
-        
-      case LoopBeg(bool: Boolean) => {
-        if (bool) {
-          binds.newScope()
-          gotoLine(line + 1)
-        }
-        else {
-          BreakLoop()
-        }
+      
+      case LoopBegStatement(_, fun: Function0[Boolean]) => {
+        GeneralWhile(fun())
+      }
+      
+      case LoopBegSymb(_, sym: Symbol) => {
+        GeneralWhile(binds.any(sym).asInstanceOf[Boolean])
+      }
+      case LoopBegNormal(_, bool: Boolean) => {
+        GeneralWhile(bool)
       }
       
       /* Find the corresponding LoopEnd instance. */
@@ -235,7 +274,9 @@ class Cminusminus {
             if (cnt == 0)
               advance = false
           }
-          else if (lines(curLine).isInstanceOf[LoopBeg]) {
+          else if (lines(curLine).isInstanceOf[LoopBegStatement]
+                  || lines(curLine).isInstanceOf[LoopBegSymb]
+                  || lines(curLine).isInstanceOf[LoopBegNormal]) {
             cnt += 1
           }
         }
@@ -244,7 +285,7 @@ class Cminusminus {
       
       /* Loop back to LoopBeg. */
       case LoopEnd(loopBegLine: Int) => {
-        gotoLine(loopBegLine + 1)
+        gotoLine(loopBegLine)
       }
       
       case FuncBeg(name: Symbol) => {
@@ -354,7 +395,7 @@ class Cminusminus {
 
   /* Random number functions. */
   def between(i: Int, j: Int): Int = { random.nextInt(j + 1 - i) + i }
-
+  
   /* Maximum and Minimum functions. */
   def maxOf(i: Any, j: Any): Function0[Any] = {
     () =>
@@ -420,8 +461,10 @@ class Cminusminus {
       }
   }
 
-  /* Basic Mathematical Operations. */
+  /* General Operations. */
   implicit def operator_any(i: Any) = new {
+    
+    /* Basic Mathematical Operations. */
     def plus(j: Any): Function0[Any] = {
       () =>
         {
@@ -581,7 +624,58 @@ class Cminusminus {
           }
         }
     }
+    
+    /* Basic Boolean Operations. */  
+    def and(j: Any): Function0[Boolean] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.any(_i).asInstanceOf[Boolean]
+            case _i: Function0[Any] => _i()
+            case _ => i
+          }
 
+          val base_j = j match {
+            case _j: Symbol => binds.any(_j).asInstanceOf[Boolean]
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Boolean => {
+              base_j match {
+                case _j: Boolean => _i && _j
+              }
+            }
+          }
+        }
+    }
+    
+    def or(j: Any): Function0[Boolean] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.any(_i).asInstanceOf[Boolean]
+            case _i: Function0[Any] => _i()
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.any(_j).asInstanceOf[Boolean]
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Boolean => {
+              base_j match {
+                case _j: Boolean => _i || _j
+              }
+            }
+          }
+        }
+    }
+    
     def isGreaterThan(j: Any): Function0[Boolean] = {
       () =>
         {
@@ -678,6 +772,37 @@ class Cminusminus {
         }
     }
 
+    def isNot(j: Any): Function0[Boolean] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.anyval(_i)
+            case _i: Function0[Any] => _i()
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.anyval(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Int => {
+              base_j match {
+                case _j: Int => _i != _j
+                case _j: Double => _i != _j
+              }
+            }
+            case _i: Double => {
+              base_j match {
+                case _j: Int => _i != _j
+                case _j: Double => _i != _j
+              }
+            }
+          }
+        }
+    }
   }
 
   object Input {
@@ -748,8 +873,8 @@ class Cminusminus {
   object Variable {
     def apply(s: Symbol) = Assignment(s)
   }
-
-  object variable_default {
+  
+  object EmptyVariable {
     def apply(s: Any) = {}
   }
 
@@ -762,13 +887,29 @@ class Cminusminus {
       lines(current) = IfSymb(current, s)
       current += 1
     }
+    def apply(s: Boolean) = {
+      lines(current) = IfNormal(current, s)
+      current += 1
+    }
+  }
+  object While {
+    def apply(s: Function0[Boolean]) = {
+      lines(current) = LoopBegStatement(current, s)
+      loopBegLines.push(current)
+      current += 1
+    }
+    def apply(s: Symbol) {
+      lines(current) = LoopBegSymb(current, s)
+      loopBegLines.push(current)
+      current += 1
+    }
+    def apply(s: Boolean) {
+      lines(current) = LoopBegNormal(current, s)
+      loopBegLines.push(current)
+      current += 1
+    }
   }
 
-  def While(bool: Boolean) {
-    lines(current) = LoopBeg(bool)
-    loopBegLines.push(current)
-    current += 1
-  }
 
   def Done {
     lines(current) = LoopEnd(loopBegLines.pop())
@@ -869,10 +1010,8 @@ class Cminusminus {
     }
 
     /**
-     * WARNING: don't use yet
      * returns ints and doubles
      */
-    /* DID NOT TOUCH THIS WHILE IMPLEMENTING SCOPE */
     def anyval(k: Symbol): AnyVal = {
       any(k) match {
         case n: Int => n
