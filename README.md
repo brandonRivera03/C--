@@ -23,6 +23,7 @@ I also added more functionality for them: conditionals can now take straight boo
 
 Added and & or operators, function as normal bool operators.
 
+------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
 
