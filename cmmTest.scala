@@ -12,6 +12,7 @@ object cmmTest extends Cminusminus {
     Variable('number) is between(1, 20)
     Variable('attempts) is 1
     While(true)
+      //Variable('test) is 10
       Print("Guess a number between 1 and 20 (inclusive)")
       Input('guess)
       If('guess isLessThan 'number)

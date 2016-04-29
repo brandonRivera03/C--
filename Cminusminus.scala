@@ -53,7 +53,7 @@ class Cminusminus {
     binds.newScope()
   }
 
-  def ifFalse() = {
+  def Else() = {
     lines(current) = StartFalse(current)
     current += 1
   }
@@ -98,20 +98,27 @@ class Cminusminus {
   private def gotoLine(line: Int) {
 
     def GeneralIf(bool: Boolean): Unit = {
-      if (bool) {  /* If the conditional was true. */
+      /* If the conditional was true. */
+      if (bool) {  
+        binds.newScope()
         gotoLine(line + 1)
       } 
-      else {       /* Find next statement we need to run. */
+      /* Find next statement we need to run. */
+      else {       
         var curLine = line
-        var advance = true;
+        var advance = true
+        var cnt = 1  //Keep track of nested if statements
         while (advance) {
           curLine += 1
-          if (lines(curLine).isInstanceOf[IfStatement] 
-              || lines(curLine).isInstanceOf[EndIfStatement] 
-              || lines(curLine).isInstanceOf[StartFalse]) 
-          {
-            advance = false
+          if (lines(curLine).isInstanceOf[EndIfStatement] 
+              || lines(curLine).isInstanceOf[StartFalse]) {
+            cnt -= 1
+            if (cnt == 0)
+              advance = false
           } 
+          else if (lines(curLine).isInstanceOf[IfStatement]) {
+            cnt += 1
+          }
         }
         gotoLine(curLine + 1)
       }
@@ -195,6 +202,7 @@ class Cminusminus {
       }
 
       case EndIfStatement(_) => {
+        binds.leaveScope()
         gotoLine(line + 1);
       }
 
@@ -206,6 +214,7 @@ class Cminusminus {
         
       case LoopBeg(bool: Boolean) => {
         if (bool) {
+          binds.newScope()
           gotoLine(line + 1)
         }
         else {
@@ -213,20 +222,31 @@ class Cminusminus {
         }
       }
       
+      /* Find the corresponding LoopEnd instance. */
       case BreakLoop() => {
+        binds.leaveScope()
         var curLine = line
-        var advance = true;
+        var advance = true
+        var cnt = 1
         while (advance) {
           curLine += 1
           if (lines(curLine).isInstanceOf[LoopEnd]) {
-            advance = false;
+            cnt -= 1
+            if (cnt == 0)
+              advance = false
+          }
+          else if (lines(curLine).isInstanceOf[LoopBeg]) {
+            cnt += 1
           }
         }
         gotoLine(curLine + 1)
       }
+      
+      /* Loop back to LoopBeg. */
       case LoopEnd(loopBegLine: Int) => {
         gotoLine(loopBegLine + 1)
       }
+      
       case FuncBeg(name: Symbol) => {
         var lineVar = line
         while (!lines(lineVar).isInstanceOf[FuncEnd]) {
@@ -234,27 +254,24 @@ class Cminusminus {
         }
         gotoLine(lineVar + 1)
       }
+      
       case FuncEnd() => {
 
-        // always pop from returnStack
         val temp: Any = returnStack.pop()
 
         binds.leaveScope()
 
-        // TODO add more options
         temp match {
           case t: Function0[Any] => {
             if (returnStack.length > 0) {
               returnStack.pop() match {
                 case v: Symbol => {
-                  // set our return variable
                   binds.set(v, t())
                 }
                 case v => {
                   v match {
-                    case None => // throw both away
+                    case None => 
                     case _ => {
-                      // oops both were good values
                       returnStack.push(v)
                       returnStack.push(t)
                     }
@@ -267,14 +284,12 @@ class Cminusminus {
             if (returnStack.length > 0) {
               returnStack.pop() match {
                 case v: Symbol => {
-                  // set our return variable
                   binds.set(v, t)
                 }
                 case v => {
                   v match {
-                    case None => // throw both away
+                    case None =>
                     case _ => {
-                      // oops both were good values
                       returnStack.push(v)
                       returnStack.push(t)
                     }
@@ -284,7 +299,6 @@ class Cminusminus {
             }
           }
           case t: Symbol => {
-            // oops we popped a symbol
             returnStack.push(t)
           }
           case None =>
@@ -293,6 +307,7 @@ class Cminusminus {
 
         gotoLine(pcStack.pop())
       }
+      
       case FuncReturn(value: Any) => {
 
         // check and evaluate the types
@@ -309,6 +324,7 @@ class Cminusminus {
         }
         gotoLine(lineVar)
       }
+      
       case FuncCall(funcName: Symbol) => {
         // push trash onto the return stack
         returnStack.push(None)
@@ -319,6 +335,7 @@ class Cminusminus {
           case None => -1
         })
       }
+      
       case FuncCallReturn(funcName: Symbol, variable: Symbol) => {
         // push the return variable onto the return stack
         returnStack.push(variable)
@@ -329,6 +346,7 @@ class Cminusminus {
           case None => -1
         })
       }
+      
       case EndStatement(_) =>
       case _ =>
     }
@@ -770,7 +788,7 @@ class Cminusminus {
     }
   }
 
-  object Send {
+  object Return {
     def apply(value: Any) = {
       lines(current) = FuncReturn(value)
       current += 1
@@ -822,7 +840,6 @@ class Cminusminus {
       while (!bindingsStack.isEmpty && !bindingsStack.top.contains(sym)) {
         bindingsStackCopy.push(bindingsStack.pop())
       }
-      //bindingsStackCopy.push(bindingsStack.pop())
       var map = bindingsStackTop
       if (!bindingsStack.isEmpty) {
         map = bindingsStack.top
