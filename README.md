@@ -6,7 +6,7 @@ you'd normally use for eclipse and it should run fine. All it is
 is the lolcode and its demo with keywords replaced with something more
 natural. 
 
-04/25/2016:
+#04/25/2016:
 I uploaded an updated Cminusminus.scala and cmmTest.scala. Replace them as usual.
 Two major changes: loops now require a conditional, just as a normal while loop does. To break out of the loop one must either use a break statement or the conditional must fail at some point.
 I also changed how functions appear to be more sentence-like. For example, an if statement would follow the lines of:
@@ -15,7 +15,7 @@ Basically uses actually words and things like Print and If and stuff are capital
 
 I know I said I would change if statements to be better but in actuality it works just fine originally, all the basic functionality is there, other than an elseif statement.
 
-04/28/2016
+#04/28/2016
 Fixed an error I made for if and while: before it didn't allow for nested if or while loops, but now it should work.
 Also added scoping for if and while loops. Originally a declaration made in an if statement could carry over outside, now it can't, which is more correct. 
 
