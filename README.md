@@ -25,6 +25,14 @@ Added and & or operators, function as normal bool operators.
 
 I was trying to add an increment operator, so you could call Increment ('variable) by (10) or something, but it wasn't working. Maybe someone else can try that.
 
+#04/29/2016
+Ok so normal assignments are done by first identifying the object Variable, which takes in a symbol (uses notation like: 'x) and then calls Assignment class on (s). The assignment class has an s and expects a value v, v being a string, an int, a double, or a function. It uses the keywords "is" or "equals" to allow the next step. The assignment class calls class Assign, which requires a line number as well as a function, that function in this case binds the symbol and value onto the bindings hashmap. So in order: Create a variable symbol, give it a value with type (int, double, string, or function that returns type any, which is all of the above), and then bind it to the hashmap of the particular scope.
+
+To implement increment, I tried to add in an alternative to assignment. It would start with an object Increment, which given a symbol would call a variation of the Assignment class, which would use a keyword "by" instead of "is" or "equals". Then I would try to get the value already stored by symbol and increment it by the new value. So it would be like:
+Increment ('number) by (1).
+Unfortunately Scala throws an error saying that the symbol doesn't exist on the hashmap, even if it was clearly instatiated earlier. So the challenge is trying to get the value stored earlier now and solving why it doesn't seem to be on the hashmap.
+
+As for lists, you would need to add a type List in addition to the types Any and Anyval, etc that are already there. Ideally you would use a different assignment object once again: so instead of Variable, you would make an object List, which calls some other modified Assignment class and uses its own keywords, etc. 
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
