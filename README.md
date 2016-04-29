@@ -23,6 +23,8 @@ I also added more functionality for them: conditionals can now take straight boo
 
 Added and & or operators, function as normal bool operators.
 
+I was trying to add an increment operator, so you could call Increment ('variable) by (10) or something, but it wasn't working. Maybe someone else can try that.
+
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
