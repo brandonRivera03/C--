@@ -33,6 +33,7 @@ Increment ('number) by (1).
 Unfortunately Scala throws an error saying that the symbol doesn't exist on the hashmap, even if it was clearly instatiated earlier. So the challenge is trying to get the value stored earlier now and solving why it doesn't seem to be on the hashmap.
 
 As for lists, you would need to add a type List in addition to the types Any and Anyval, etc that are already there. Ideally you would use a different assignment object once again: so instead of Variable, you would make an object List, which calls some other modified Assignment class and uses its own keywords, etc. So perhaps a list would be instantiated like:
+
 List ('x) includes (1, 2, 3, 4, 5)
 
 ------------------------------------------------
