@@ -15,6 +15,10 @@ Basically uses actually words and things like Print and If and stuff are capital
 
 I know I said I would change if statements to be better but in actuality it works just fine originally, all the basic functionality is there, other than an elseif statement.
 
+04/28/2016
+Fixed an error I made for if and while: before it didn't allow for nested if or while loops, but now it should work.
+Also added scoping for if and while loops. Originally a declaration made in an if statement could carry over outside, now it can't, which is more correct. 
+
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
 
