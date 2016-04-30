@@ -11,6 +11,7 @@ class Cminusminus {
   case class PrintNumber(num: Int, s: Int) extends C_Line
   case class PrintFunction(num: Int, s: Function0[Any]) extends C_Line
   case class PrintMany(num: Int, s: Vector[Any]) extends C_Line
+  case class PrintArray(num: Int, s: Array[Any]) extends C_Line
   case class ReadString(num: Int, s: Symbol) extends C_Line
   case class ErrorPrintString(num: Int, s: String) extends C_Line
   case class ErrorPrintVariable(num: Int, s: Symbol) extends C_Line
@@ -80,6 +81,13 @@ class Cminusminus {
       lines(current) = Assign(current, (() => binds.set(sym, v())))
       current += 1
     }
+    
+    def is(v: Array[String]): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    
+//    def is(v: Arry[Int]): 
 
     def equals(v: String): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
@@ -94,6 +102,7 @@ class Cminusminus {
       current += 1
     }
   }
+  
 
   /* Runtime Evaluation. */
   private def gotoLine(line: Int) {
@@ -164,10 +173,21 @@ class Cminusminus {
         println(s)
         gotoLine(line + 1)
       }
+      
+      
       case PrintVariable(_, s: Symbol) => {
-        println(binds.any(s))
+       try{
+        val array = binds.arrayval(s)
+        println(array.mkString(" "))  
+       } catch{
+         case e: Exception =>{
+           println(binds.any(s))
+         }
+       } 
         gotoLine(line + 1)
       }
+      
+      
       case PrintNumber(_, s: Int) => {
         println(s)
         gotoLine(line + 1)
@@ -185,6 +205,11 @@ class Cminusminus {
         }).mkString(" "))
 
         gotoLine(line + 1)
+      }
+      
+      case PrintArray(_,s: Array[Any]) =>{
+        println(s.mkString(" "))
+        gotoLine(line+1)
       }
 
       case ErrorPrintString(_, s: String) => {
@@ -464,6 +489,29 @@ class Cminusminus {
   /* General Operations. */
   implicit def operator_any(i: Any) = new {
     
+    def index(j: Any):Function0[Any] = {
+       () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.arrayval(_i)
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.num(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Array[Any] => {
+              base_j match {
+                case _j: Int => _i(_j)
+              }
+            }
+          }
+        }
+    }
     /* Basic Mathematical Operations. */
     def plus(j: Any): Function0[Any] = {
       () =>
@@ -829,9 +877,16 @@ class Cminusminus {
       lines(current) = PrintString(current, s)
       current += 1
     }
-    def apply(s: Any*) = {
-      lines(current) = PrintMany(current, s.toVector)
+    def apply(s: Array[Any]) ={
+      println("here")
+      lines(current) = PrintArray(current, s)
       current += 1
+      
+    }
+    def apply(s: Any*) = {
+      println("here2")
+      lines(current) = PrintMany(current, s.toVector)
+      current += 1  
     }
     def apply(s: Symbol) = {
       lines(current) = PrintVariable(current, s)
@@ -873,6 +928,7 @@ class Cminusminus {
   object Variable {
     def apply(s: Symbol) = Assignment(s)
   }
+  
   
   object EmptyVariable {
     def apply(s: Any) = {}
@@ -1017,6 +1073,13 @@ class Cminusminus {
         case n: Int => n
         case n: Double => n
         case _ => throw new RuntimeException(f"Variable $k does not exist as type AnyVal")
+      }
+    }
+    
+    def arrayval(k: Symbol): Array[Any] = {
+      any(k) match {
+        case n: Array[Any] => n
+        case _ => throw new RuntimeException(f"Variable $k does not exist as type Array")
       }
     }
 

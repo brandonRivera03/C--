@@ -10,7 +10,10 @@ object cmmTest extends Cminusminus {
     Print("We will give you hints regarding your guess.")
     Print("--------------")
     Variable('number) is between(1, 20)
-    Variable('attempts) is 1
+    Variable('attempts) is 1 
+    Variable ('array) is Array("abc","dsafsd","asdf")
+    Print('array index 0+1)
+    Print(1)
     While(true)
       Print("Guess a number between 1 and 20 (inclusive)")
       Input('guess)
@@ -37,7 +40,7 @@ object cmmTest extends Cminusminus {
 //      EndIf
       Variable ('attempts) is ('attempts plus 1)
     Done
-    Print("It took you", 'attempts, "turns!")
+//    Print("It took you", 'attempts, "turns!")
     End
   }
 }
