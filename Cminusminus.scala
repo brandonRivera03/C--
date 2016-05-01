@@ -77,7 +77,7 @@ class Cminusminus {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
       current += 1
     }
-    def is(v: List[Int]): Unit = {
+    def is(v: List[Any]): Unit = {
       lines(current) = Assign(current, (() => binds.setList(sym,v)))
       current += 1
     }
@@ -496,30 +496,188 @@ class Cminusminus {
         }
       }
   }
-	  def get(sym : Symbol) : Function0[Any] = {  
-     () => {     
-      var x : List[Int] = binds.anyList(sym)     
-      x
-     }  
+
+  /* Returns the List object */
+	def get(sym : Symbol) : Function0[Any] = {
+	  () => {
+      var x : List[Any] = binds.anyList(sym)  
+      x 
+	  }
   }
-  def getTail(sym : Symbol) : Function0[Any] = {  
-     () => {     
-      var x : List[Int] = binds.anyList(sym)     
-      x tail
-     }  
+
+  /*
+   * Returns a List consisting of the tail, or a list without the
+   * head element
+   */
+  def getTail(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)     
+      
+      if(x.size > 0) {
+        x tail
+      }
+      else {
+        None
+      }
+    }
   }
-  def getHead(sym : Symbol) : Function0[Any] = {  
-     () => {     
-      var x : List[Int] = binds.anyList(sym)     
-      x head
-     }  
+
+  /* Returns the head element of a list */
+  def getHead(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)
+
+      if(x.size > 0) {
+        x head
+      }
+      else {
+        None
+      }
+    }
   }
-  def get(sym : Symbol, idx : Int) : Function0[Any] = {  
-     () => {      
-      var x : List[Int] = binds.anyList(sym)
-      x(idx)
-     }  
+
+  /* Returns the element associated to an index of a list */
+  def get(sym : Symbol, idx : Int) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)
+
+      /* In case the user puts an index outside the size of the list
+       * then we take the modulo of it */
+      if(x.size != 0) {
+        val i = idx % x.size
+
+        x(i)
+      }
+      else {
+        None
+      }
+    }
   }
+
+  /* Returns a list with a value inserted into an existing list
+   * at a specified index
+   */
+  def insert(sym : Symbol, idx : Int, v : Any) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      /* In case the user puts an index outside the size of the list
+       * then we take the modulo of it */
+      if(x.size != 0) {
+        val i = idx % x.size
+
+        (x.slice(0, i) :+ v) ::: x.slice(i, x.size)
+      }
+      else {
+        x :+ v
+      }
+    }
+  }
+
+  /* Returns a list with that updates a value to a specified index
+   */
+  def update(sym : Symbol, idx : Int, v : Any) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      /* In case the user puts an index outside the size of the list
+       * then we take the modulo of it */
+      if(x.size != 0) {
+        val i = idx % x.size
+
+        (x.slice(0, i) :+ v) ::: x.slice(i+1, x.size)
+      }
+      else {
+        x :+ v
+      }
+    }
+  } 
+
+  /* Returns a list with a value or list appended to the end of another
+   * list
+   */
+  def append(sym : Symbol, v : Any) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      v match {
+        case l: List[Any] => x ::: l
+        case _ => x :+ v
+      }
+    }
+  }
+
+  /* Returns a list with a value or list appended to the beginning of
+   * another list 
+   */
+  def prepend(sym : Symbol, v : Any) : Function0[Any] = {
+     () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      v match {
+        case l: List[Any] => l ::: x
+        case _ => v +: x
+      }
+     }
+  }
+
+  /* Returns the size of a list */
+  def getSize(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      if(x.size != 0) {
+        x.size
+      }
+      else {
+        0
+      }
+    }
+  }
+
+  /* Returns a list that removes a single element from another list */
+  def remove(sym : Symbol, idx : Int) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+      var i = 0
+
+      /* In case the user puts an index outside the size of the list
+       * then we take the modulo of it */
+      if(x.size != 0) {
+        i = idx % x.size
+
+        x.slice(0, i) ::: x.slice(i+1, x.size)
+      }
+      else {
+        x
+      }
+    }
+  }
+
+  /* Returns a list that removes a number of elements from one index
+   * to another index from a specified list
+   */
+  def remove(sym : Symbol, idx1 : Int, idx2 : Int) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      /* In case the user puts an index outside the size of the list
+       * then we take the modulo of it */
+      if(x.size != 0) {
+        val i = idx1 % x.size
+        val j = idx2 % x.size
+
+        val minIdx = min(i, j)
+        val maxIdx = max(i, j)
+
+        x.slice(0, minIdx) ::: x.slice(maxIdx, x.size)
+      }
+      else {
+        x
+      }
+    }
+  }
+
   /* General Operations. */
   implicit def operator_any(i: Any) = new {
     
@@ -1044,7 +1202,7 @@ class Cminusminus {
 
     class Tables(){
     var x = HashMap[Symbol, Any]()
-    var y = HashMap[Symbol, List[Int]]()
+    var y = HashMap[Symbol, List[Any]]()
   }
   
   class Bindings {
@@ -1090,10 +1248,10 @@ class Cminusminus {
     /**
      * set a value in our map
      */
-    def setList(k: Symbol, v: List[Int]): Unit = {
+    def setList(k: Symbol, v: List[Any]): Unit = {
       val map = getMap(k).y
       map(k) = v;
-      println("set list says: " + map.toString())
+//      println("set list says: " + map.toString())
     }
     
     def set(k: Symbol, v: Any): Unit = {
@@ -1137,9 +1295,9 @@ class Cminusminus {
       }
     }
         
-    def anyList(k: Symbol): List[Int] = {
+    def anyList(k: Symbol): List[Any] = {
       val map = getMap(k).y
-      println("any list says: " + map.toString())
+//      println("any list says: " + map.toString())
       map.get(k) match {
         case Some(x) => x
         case None => List()
