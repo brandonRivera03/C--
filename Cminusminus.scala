@@ -85,13 +85,10 @@ class Cminusminus {
       lines(current) = Assign(current, (() => binds.set(sym, v())))
       current += 1
     }
-    
     def is(v: Array[String]): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
       current += 1
     }
-    
-//    def is(v: Arry[Int]): 
 
     def equals(v: String): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
@@ -101,8 +98,37 @@ class Cminusminus {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
       current += 1
     }
+    def equals(v: List[Any]): Unit = {
+      lines(current) = Assign(current, (() => binds.setList(sym,v)))
+      current += 1
+    }
     def equals(v: Function0[Any]): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v())))
+      current += 1
+    }
+    def equals(v: Array[String]): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    
+    def isDefinedAs(v: String): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    def isDefinedAs(v: AnyVal): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    def isDefinedAs(v: List[Any]): Unit = {
+      lines(current) = Assign(current, (() => binds.setList(sym,v)))
+      current += 1
+    }
+    def isDefinedAs(v: Function0[Any]): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v())))
+      current += 1
+    }
+    def isDefinedAs(v: Array[String]): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, v)))
       current += 1
     }
   }
@@ -119,7 +145,6 @@ class Cminusminus {
       }
       /* Go to end of loop. */
       else {
-        binds.leaveScope()
         var curLine = line
         var advance = true
         var cnt = 1
@@ -385,16 +410,13 @@ class Cminusminus {
         gotoLine(pcStack.pop())
       }
       
+      /* Update location but ignore for now. */
       case FuncReturn(value: Any) => {
-
-        // check and evaluate the types
         value match {
           case v: Function0[Any] => returnStack.push(v())
           case v: Symbol => returnStack.push(binds.any(v))
           case v => returnStack.push(v)
         }
-
-        // actually need to go to end of function
         var lineVar = line
         while (!lines(lineVar).isInstanceOf[FuncEnd]) {
           lineVar += 1
@@ -402,24 +424,23 @@ class Cminusminus {
         gotoLine(lineVar)
       }
       
+      /* Update location we want to return to and go to where FuncReturn is. */
       case FuncCall(funcName: Symbol) => {
-        // push trash onto the return stack
         returnStack.push(None)
         pcStack.push(line + 1)
         binds.newScope()
         gotoLine(funcBegLines.get(funcName) match {
-          case Some(s) => s + 1 //go beyond the start of the function
+          case Some(s) => s + 1
           case None => -1
         })
       }
       
       case FuncCallReturn(funcName: Symbol, variable: Symbol) => {
-        // push the return variable onto the return stack
         returnStack.push(variable)
         pcStack.push(line + 1)
         binds.newScope()
         gotoLine(funcBegLines.get(funcName) match {
-          case Some(s) => s + 1 // go beyond the start of the function
+          case Some(s) => s + 1
           case None => -1
         })
       }
@@ -429,11 +450,17 @@ class Cminusminus {
     }
   }
 
-  /* Random number functions. */
-  def between(i: Int, j: Int): Int = { random.nextInt(j + 1 - i) + i }
+  /* Random number generator functions. */
+  //It seems that calling this repeatedly during run time always returns the same value
+  def between(i: Int, j: Int): Int = { 
+    random.nextInt(j + 1 - i) + i 
+  }
+  def eitherTrueOrFalse: Boolean = {
+    random.nextBoolean
+  }
   
   /* Maximum and Minimum functions. */
-  def maxOf(i: Any, j: Any): Function0[Any] = {
+  def theHighestValueBetween(i: Any, j: Any): Function0[Any] = {
     () =>
       {
         val base_i = i match {
@@ -465,7 +492,7 @@ class Cminusminus {
       }
   }
 
-  def minOf(i: Any, j: Any): Function0[Any] = {
+  def theLowestValueBetween(i: Any, j: Any): Function0[Any] = {
     () =>
       {
         val base_i = i match {
@@ -521,6 +548,18 @@ class Cminusminus {
       }
     }
   }
+  def theLastValueOf(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)     
+      
+      if(x.size > 0) {
+        x tail
+      }
+      else {
+        None
+      }
+    }
+  }
 
   /* Returns the head element of a list */
   def getHead(sym : Symbol) : Function0[Any] = {
@@ -535,7 +574,18 @@ class Cminusminus {
       }
     }
   }
+  def theFirstValueOf(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)
 
+      if(x.size > 0) {
+        x head
+      }
+      else {
+        None
+      }
+    }
+  }
   /* Returns the element associated to an index of a list */
   def get(sym : Symbol, idx : Int) : Function0[Any] = {
     () => {
@@ -634,7 +684,31 @@ class Cminusminus {
       }
     }
   }
+  def theSizeOf(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
 
+      if(x.size != 0) {
+        x.size
+      }
+      else {
+        0
+      }
+    }
+  }
+  def theNumberOfElementsIn(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x: List[Any] = binds.anyList(sym)
+
+      if(x.size != 0) {
+        x.size
+      }
+      else {
+        0
+      }
+    }
+  }
+  
   /* Returns a list that removes a single element from another list */
   def remove(sym : Symbol, idx : Int) : Function0[Any] = {
     () => {
@@ -681,8 +755,81 @@ class Cminusminus {
   /* General Operations. */
   implicit def operator_any(i: Any) = new {
     
+    /* Array indexing. */
     def index(j: Any):Function0[Any] = {
        () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.arrayval(_i)
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.num(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Array[Any] => {
+              base_j match {
+                case _j: Int => _i(_j)
+              }
+            }
+          }
+        }
+    }
+    
+    def atIndex(j: Any):Function0[Any] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.arrayval(_i)
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.num(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Array[Any] => {
+              base_j match {
+                case _j: Int => _i(_j)
+              }
+            }
+          }
+        }
+    }
+    
+    def pos(j: Any):Function0[Any] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.arrayval(_i)
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.num(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          base_i match {
+            case _i: Array[Any] => {
+              base_j match {
+                case _j: Int => _i(_j)
+              }
+            }
+          }
+        }
+    }
+    
+    def atPosition(j: Any):Function0[Any] = {
+      () =>
         {
           val base_i = i match {
             case _i: Symbol => binds.arrayval(_i)
@@ -1045,6 +1192,7 @@ class Cminusminus {
     }
   }
 
+  /* Read from keyboard. */
   object Input {
     def apply(s: Symbol) = {
       lines(current) = ReadString(current, s)
@@ -1052,10 +1200,6 @@ class Cminusminus {
     }
   }
 
-  /**
-   * attempt to convert String to an Integer
-   * if not possible, return the original String
-   */
   def tryInt(s: String): Any = {
     try {
       s.toInt
@@ -1070,13 +1214,11 @@ class Cminusminus {
       current += 1
     }
     def apply(s: Array[Any]) ={
-      println("here")
       lines(current) = PrintArray(current, s)
       current += 1
       
     }
     def apply(s: Any*) = {
-      println("here2")
       lines(current) = PrintMany(current, s.toVector)
       current += 1  
     }
@@ -1184,7 +1326,7 @@ class Cminusminus {
     }
   }
 
-  def FunctionEnd {
+  def EndFunction{
     lines(current) = FuncEnd()
     current += 1
   }
@@ -1200,41 +1342,34 @@ class Cminusminus {
     }
   }
 
-    class Tables(){
+  /* To allow Lists, we must make a different hashmap separate from normal vals. */
+  class Tables(){
     var x = HashMap[Symbol, Any]()
     var y = HashMap[Symbol, List[Any]]()
   }
   
+  /* The hashmap where symbols are binded with values. */
   class Bindings {
     val bindingsStack = Stack[Tables]()
     val bindings = HashMap[Symbol, Any]()
 
-    /*
-     * Create a new scope.
-     * Call whenever doing a function call.
-     */
+    /* Creates new topmost scope. */
     def newScope() {
       bindingsStack.push(new Tables)
     }
 
-    /*
-     * Destroy topmost scope.
-     * Call whenever leaving a function.
-     */
+    /* Destroys topmost scope. */
     def leaveScope() {
       bindingsStack.pop()
     }
 
-    /**
-     * get correct HashMap for your scope
-     */
+    /* Get map based on scope. */
     def getMap(sym: Symbol): Tables = {
       val bindingsStackCopy = Stack[Tables]()
       val bindingsStackTop = bindingsStack.top
       while (!bindingsStack.isEmpty && !(bindingsStack.top.x.contains(sym) || bindingsStack.top.y.contains(sym))) {
         bindingsStackCopy.push(bindingsStack.pop())
       }
-      //bindingsStackCopy.push(bindingsStack.pop())
       var map = bindingsStackTop
       if (!bindingsStack.isEmpty) {
         map = bindingsStack.top
@@ -1245,23 +1380,19 @@ class Cminusminus {
       map
     }
 
-    /**
-     * set a value in our map
-     */
+    /* Sets a list to the lists map. */
     def setList(k: Symbol, v: List[Any]): Unit = {
       val map = getMap(k).y
       map(k) = v;
-//      println("set list says: " + map.toString())
     }
     
+    /* Sets any value to the bindings map. */
     def set(k: Symbol, v: Any): Unit = {
       val map = getMap(k).x
       map(k) = v;
     }
 
-    /**
-     * only returns integers
-     */
+    /* Returns an integer. */
     def num(k: Symbol): Int = {
       any(k) match {
         case n: Int => n
@@ -1269,11 +1400,7 @@ class Cminusminus {
       }
     }
 
-    /**
-     * WARNING: don't use yet
-     * returns ints and doubles
-     */
-    /* DID NOT TOUCH THIS WHILE IMPLEMENTING SCOPE */
+    /* Returns ints and doubles. */
     def anyval(k: Symbol): AnyVal = {
       any(k) match {
         case n: Int => n
@@ -1283,10 +1410,7 @@ class Cminusminus {
     }
     
 
-    /**
-     * returns anything
-     */
-    
+    /* Returns anything. */
     def any(k: Symbol): Any = {
       val map = getMap(k).x
       map.get(k) match {
@@ -1294,17 +1418,18 @@ class Cminusminus {
         case None => None
       }
     }
-        
+     
+    /* Returns a list of type any. */
     def anyList(k: Symbol): List[Any] = {
       val map = getMap(k).y
-//      println("any list says: " + map.toString())
       map.get(k) match {
         case Some(x) => x
         case None => List()
       }
     }
     
-        def arrayval(k: Symbol): Array[Any] = {		
+    /* Returns an array of type any. */
+    def arrayval(k: Symbol): Array[Any] = {		
       any(k) match {		
         case n: Array[Any] => n		
         case _ => throw new RuntimeException(f"Variable $k does not exist as type Array")		
