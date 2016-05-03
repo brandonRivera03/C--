@@ -39,36 +39,7 @@ As for lists, you would need to add a type List in addition to the types Any and
 List ('x) includes (1, 2, 3, 4, 5)
 
 #05/02/2016
-line 51, in def End():
-gotoLine(lines.keys.toList.sorted.head)
-occassionally (maybe 1 in 5 times) will jump to some line it shouldn't really go to. This is the call stack I was getting:
-
-Exception in thread "main" java.util.NoSuchElementException: head of empty list
-	at scala.collection.immutable.Nil$.head(List.scala:420)
-	at scala.collection.immutable.Nil$.head(List.scala:417)
-	at scala.collection.mutable.Stack.top(Stack.scala:132)
-	at cmm.Cminusminus$Bindings.getMap(Cminusminus.scala:1349)
-	at cmm.Cminusminus$Bindings.any(Cminusminus.scala:1395)
-	at cmm.Cminusminus$$anonfun$gotoLine$1.apply(Cminusminus.scala:218)
-	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:234)
-	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:234)
-	at scala.collection.Iterator$class.foreach(Iterator.scala:893)
-	at scala.collection.AbstractIterator.foreach(Iterator.scala:1336)
-	at scala.collection.IterableLike$class.foreach(IterableLike.scala:72)
-	at scala.collection.AbstractIterable.foreach(Iterable.scala:54)
-	at scala.collection.TraversableLike$class.map(TraversableLike.scala:234)
-	at scala.collection.AbstractTraversable.map(Traversable.scala:104)
-	at cmm.Cminusminus.gotoLine(Cminusminus.scala:217)
-	at cmm.Cminusminus.GeneralWhile$1(Cminusminus.scala:144)
-	at cmm.Cminusminus.gotoLine(Cminusminus.scala:295)
-	at cmm.Cminusminus.End(Cminusminus.scala:52)
-	at cmm.cmmTest$.main(cmmTest.scala:31)
-	at cmm.cmmTest.main(cmmTest.scala)
-
-After some testing it appears to happen due to the random number generator so we may have to avoid using that or just get rid of it altogether
-
-Also i dunno how to propery adjust how github aligns tabs and stuff so the error message just looks like garbage, sorry about that but idk
-
+I ended up fixing the problem, ignore the text I made earlier. I added some redundant methods and how they are used can be seen in the slides.
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
