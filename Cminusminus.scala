@@ -525,11 +525,11 @@ class Cminusminus {
   }
 
   /* Returns the List object */
-	def get(sym : Symbol) : Function0[Any] = {
-	  () => {
-      var x : List[Any] = binds.anyList(sym)  
+  def get(sym : Symbol) : Function0[Any] = {
+    () => {
+      var x : List[Any] = binds.anyList(sym)
       x 
-	  }
+    }
   }
 
   /*
@@ -587,14 +587,23 @@ class Cminusminus {
     }
   }
   /* Returns the element associated to an index of a list */
-  def get(sym : Symbol, idx : Int) : Function0[Any] = {
+  def get(sym : Symbol, idx : Any) : Function0[Any] = {
     () => {
       var x : List[Any] = binds.anyList(sym)
 
+      /* Type check and convert the value to an Int, if applicable */
+      if(x.size != 0) {
+      	val index = idx match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+      	}
+
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
-      if(x.size != 0) {
-        val i = idx % x.size
+        val i = index % x.size
 
         x(i)
       }
@@ -607,14 +616,23 @@ class Cminusminus {
   /* Returns a list with a value inserted into an existing list
    * at a specified index
    */
-  def insert(sym : Symbol, idx : Int, v : Any) : Function0[Any] = {
+  def insert(sym : Symbol, idx : Any, v : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
 
+      /* Type check and convert the value to an Int, if applicable */
+      if(x.size != 0) {
+      	val index = idx match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+      	}
+
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
-      if(x.size != 0) {
-        val i = idx % x.size
+        val i = index % x.size
 
         (x.slice(0, i) :+ v) ::: x.slice(i, x.size)
       }
@@ -626,14 +644,23 @@ class Cminusminus {
 
   /* Returns a list with that updates a value to a specified index
    */
-  def update(sym : Symbol, idx : Int, v : Any) : Function0[Any] = {
+  def update(sym : Symbol, idx : Any, v : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
 
+      /* Type check and convert the value to an Int, if applicable */
+      if(x.size != 0) {
+      	val index = idx match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+      	}
+
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
-      if(x.size != 0) {
-        val i = idx % x.size
+        val i = index % x.size
 
         (x.slice(0, i) :+ v) ::: x.slice(i+1, x.size)
       }
@@ -710,15 +737,24 @@ class Cminusminus {
   }
   
   /* Returns a list that removes a single element from another list */
-  def remove(sym : Symbol, idx : Int) : Function0[Any] = {
+  def remove(sym : Symbol, idx : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
       var i = 0
 
+      /* Type check and convert the value to an Int, if applicable */
+      if(x.size != 0) {
+      	val index = idx match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+      	}
+
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
-      if(x.size != 0) {
-        i = idx % x.size
+        val i = index % x.size
 
         x.slice(0, i) ::: x.slice(i+1, x.size)
       }
@@ -731,15 +767,32 @@ class Cminusminus {
   /* Returns a list that removes a number of elements from one index
    * to another index from a specified list
    */
-  def remove(sym : Symbol, idx1 : Int, idx2 : Int) : Function0[Any] = {
+  def remove(sym : Symbol, idx1 : Any, idx2 : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
 
+      /* Type check and convert the value to an Int, if applicable */
+      if(x.size != 0) {
+      	val index1 = idx1 match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx1 is not a valid index")
+      	}
+      	
+      	val index2 = idx2 match {
+      		case _i: Int => _i
+      		case _i: Double => _i.asInstanceOf[Int]
+      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+      		case _i: Function0[Any] => _i().asInstanceOf[Int]
+      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx2 is not a valid index")
+      	}
+
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
-      if(x.size != 0) {
-        val i = idx1 % x.size
-        val j = idx2 % x.size
+        val i = index1 % x.size
+        val j = index2 % x.size
 
         val minIdx = min(i, j)
         val maxIdx = max(i, j)
