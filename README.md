@@ -38,6 +38,35 @@ As for lists, you would need to add a type List in addition to the types Any and
 
 List ('x) includes (1, 2, 3, 4, 5)
 
+#05/02/2016
+line 51, in def End():
+gotoLine(lines.keys.toList.sorted.head)
+occassionally will jump to some line it shouldn't really go to. This is the call stack I was getting:
+
+Exception in thread "main" java.util.NoSuchElementException: head of empty list
+	at scala.collection.immutable.Nil$.head(List.scala:420)
+	at scala.collection.immutable.Nil$.head(List.scala:417)
+	at scala.collection.mutable.Stack.top(Stack.scala:132)
+	at cmm.Cminusminus$Bindings.getMap(Cminusminus.scala:1349)
+	at cmm.Cminusminus$Bindings.any(Cminusminus.scala:1395)
+	at cmm.Cminusminus$$anonfun$gotoLine$1.apply(Cminusminus.scala:218)
+	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:234)
+	at scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:234)
+	at scala.collection.Iterator$class.foreach(Iterator.scala:893)
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1336)
+	at scala.collection.IterableLike$class.foreach(IterableLike.scala:72)
+	at scala.collection.AbstractIterable.foreach(Iterable.scala:54)
+	at scala.collection.TraversableLike$class.map(TraversableLike.scala:234)
+	at scala.collection.AbstractTraversable.map(Traversable.scala:104)
+	at cmm.Cminusminus.gotoLine(Cminusminus.scala:217)
+	at cmm.Cminusminus.GeneralWhile$1(Cminusminus.scala:144)
+	at cmm.Cminusminus.gotoLine(Cminusminus.scala:295)
+	at cmm.Cminusminus.End(Cminusminus.scala:52)
+	at cmm.cmmTest$.main(cmmTest.scala:31)
+	at cmm.cmmTest.main(cmmTest.scala)
+
+It's real hard to say what's causing it, and it's not consistent, but generally End shouldn't go to a GeneralWhile statement. Sometimes it'll go to a GeneralIf statement as well. I don't think it's worth fixing though, it might just be my own example code (it's pretty dependent on using the random number generator and a while loop, so maybe it ran out of stack? IDK). Just something we may want to keep in mind. 
+
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
