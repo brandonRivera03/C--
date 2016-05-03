@@ -65,7 +65,7 @@ Exception in thread "main" java.util.NoSuchElementException: head of empty list
 	at cmm.cmmTest$.main(cmmTest.scala:31)
 	at cmm.cmmTest.main(cmmTest.scala)
 
-It's real hard to say what's causing it, and it's not consistent, but generally End shouldn't go to a GeneralWhile statement. Sometimes it'll go to a GeneralIf statement as well. I don't think it's worth fixing though, it might just be my own example code (it's pretty dependent on using the random number generator and a while loop, so maybe it ran out of stack? IDK). Just something we may want to keep in mind. 
+After some testing it appears to happen due to the random number generator so we may have to avoid using that or just get rid of it altogether
 
 Also i dunno how to propery adjust how github aligns tabs and stuff so the error message just looks like garbage, sorry about that but idk
 
