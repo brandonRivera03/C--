@@ -10,12 +10,6 @@ object cmmTicTacToe extends Cminusminus {
     Variable('userTurn) is between(0,1)
     Variable('gameWon) is false
     Variable('gameWinner) is "Nobody"
-    Variable('counter) is 0
-    
-    Function('incrementCounter)
-    Variable('counter) is 'counter plus 1
-    Variable('counter) is 'counter modulo 9
-    EndFunction
 
     Function('printBoard)
     Variable('idx1) is get('gameBoard, 0)
@@ -75,7 +69,7 @@ object cmmTicTacToe extends Cminusminus {
     If(('idx3 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx7))
       Variable('gameWon) is true
     EndIf
-    If(('idx1 isNotEquivalentTo 1) and ('idx2 isNotEquivalentTo 2) and ('idx3 isNotEquivalentTo 3) and ('idx4 isNotEquivalentTo 4) and ('idx5 isNotEquivalentTo 5) and ('idx6 isNotEquivalentTo 6) and ('idx7 isNotEquivalentTo 7) and ('idx8 isNotEquivalentTo 8) and ('idx9 isNotEquivalentTo 9))
+    If(('idx1 isNotEquivalentTo 0) and ('idx2 isNotEquivalentTo 1) and ('idx3 isNotEquivalentTo 2) and ('idx4 isNotEquivalentTo 3) and ('idx5 isNotEquivalentTo 4) and ('idx6 isNotEquivalentTo 5) and ('idx7 isNotEquivalentTo 6) and ('idx8 isNotEquivalentTo 7) and ('idx9 isNotEquivalentTo 8))
       Variable('endGame) is true
     EndIf
 
@@ -126,11 +120,71 @@ object cmmTicTacToe extends Cminusminus {
         Print("Computer's Turn")
         Variable('computerSelection) is between(0,8)
         Variable('playLocation) is get('gameBoard, 'computerSelection)
-        While(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
-          Print("The computer chose the location: ", 'computerSelection) // DEBUG
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("cookie")
           Variable('computerSelection) is between(0,8)
           Variable('playLocation) is get('gameBoard, 'computerSelection)
-        Done
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("msokpjm")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("pwekrm")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("kjlsdf")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("sjlkp")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("asjk")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("uowejs")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("fh238h")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("fh8u23hu")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("b7d89f798")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("ba80923ysd")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("nbpnq3nd")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
+        If(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          EmptyVariable("9uvb0nens")
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
+        EndIf
         Print("The computer has placed his marker (O) on ", 'playLocation)
         Variable('gameBoard) is update('gameBoard, 'computerSelection, "O")
         Call('checkWin)
