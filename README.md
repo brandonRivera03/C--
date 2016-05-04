@@ -44,6 +44,10 @@ I ended up fixing the problem, ignore the text I made earlier. I added some redu
 #05/03/2016
 I tried creating a Tic-Tac-Toe game for our demo. But as of right now it keeps reporting an error "head of empty list" specifically when I try to change the value of 'userTurn (which switches the user turn and computers turn appropriately). Also I did a crude fix on testing the equality for boolean and symbol values by simply using the == operand as oppose to isEqualTo function (since it only takes Ints and Doubles right now thanks to the anyval binding made within it - not Booleans or other data types). 
 
+#05/04/2016
+Added isEquivalentTo method to the base code (works like isEqualTo but not limited to input types AnyVal). Also imported the file which allows Input to work (for readLine to function).
+Fixed the Tic-Tac-Toe game so it compiles and runs. However it still doesn't function as desired. It keeps retreiving old data from the hashmap and updates on that as oppose to the most recent information. I have added some DEBUG print statements to BOTH the base code [Cminusminus] and Tic-Tac-Toe files. Just ctrl+f the word "DEBUG" to find them.
+
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
