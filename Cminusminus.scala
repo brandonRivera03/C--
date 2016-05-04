@@ -83,14 +83,17 @@ class Cminusminus {
       current += 1
     }
     def is(v: Function0[Any]): Unit = {
-      val val_v = v match {
-        case x: List[Any] => x()
-        case _ => v
-      }
+      val val_v = v()
+//      println("Declaring function " + v + " with value " + val_v)
       val_v match {
-        case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, x)))
+        case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, v().asInstanceOf[List[Any]])))
+        case x: Int => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Int])))
+        case x: Double => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Double])))
+        case x: Array[Any] => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Array[Any]])))
         case _ => lines(current) = Assign(current, (() => binds.set(sym, v())))
       }
+//      val val_v = v()
+//      lines(current) = Assign(current, (() => binds.set(sym, val_v)))
       current += 1
     }
     def is(v: Array[String]): Unit = {
@@ -540,7 +543,7 @@ class Cminusminus {
   /* Returns the List object */
   def get(sym : Symbol) : Function0[Any] = {
     () => {
-      var x : List[Any] = binds.anyList(sym)
+      val x = binds.anyList(sym)
       x 
     }
   }
@@ -660,9 +663,6 @@ class Cminusminus {
   def update(sym : Symbol, idx : Any, v : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
-      
-      println("Value of symbol: " + x) // DEBUG
-      println("Value of idx: " + idx) // DEBUG
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
@@ -673,14 +673,13 @@ class Cminusminus {
           case _i: Function0[Any] => _i().asInstanceOf[Int]
           case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
         }
-        
-        println("Value of index: " + index) // DEBUG
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
         val i = index % x.size
 
-        (x.slice(0, i) :+ v) ::: x.slice(i+1, x.size)
+        val ret = (x.slice(0, i) :+ v) ::: x.slice(i+1, x.size)
+        ret
       }
       else {
         x :+ v
@@ -1262,8 +1261,44 @@ class Cminusminus {
             case bool if bool == false => 0
             case _ => base_j
           }
-          
           new_i == new_j
+        }
+    }
+    
+    def isNotEquivalentTo(j: Any): Function0[Boolean] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.any(_i)
+            case _i: Function0[Any] => _i()
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.any(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          val new_i = base_i match {
+            case _i: Int => _i
+            case _i: Double => _i.asInstanceOf[Int]
+            case _i: Function0[Any] => _i()
+            case bool if bool == true => 1
+            case bool if bool == false => 0
+            case _ => base_i
+          }
+          
+          val new_j = base_j match {
+            case _j: Int => _j
+            case _j: Double => _j.asInstanceOf[Int]
+            case _j: Function0[Any] => _j()
+            case bool if bool == true => 1
+            case bool if bool == false => 0
+            case _ => base_j
+          }
+          
+          new_i != new_j
         }
     }    
 
