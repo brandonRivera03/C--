@@ -6,6 +6,7 @@ object cmmTicTacToe extends Cminusminus {
   def main(args: Array[String]): Unit = {
     Begin
     Variable('gameBoard) is List(1,2,3,4,5,6,7,8,9)
+    Variable('playLocation) is 0
     Variable('userTurn) is between(0,1)
     Variable('gameWon) is false
     Variable('gameWinner) is "Nobody"
@@ -43,111 +44,116 @@ object cmmTicTacToe extends Cminusminus {
     Variable('idx8) is get('gameBoard, 7)
     Variable('idx9) is get('gameBoard, 8)
 
-    If(true)
-      If('idx1 == 'idx2 and 'idx2 == 'idx3)
-        Variable('gameWon) is true
-      EndIf
-      If('idx4 == 'idx5 and 'idx5 == 'idx6)
-        Variable('gameWon) is true
-      EndIf
-      If('idx7 == 'idx8 and 'idx8 == 'idx9)
-        Variable('gameWon) is true
-      EndIf
-
-      If('idx1 == 'idx4 and 'idx4 == 'idx7)
-        Variable('gameWon) is true
-      EndIf
-      If('idx2 == 'idx5 and 'idx5 == 'idx8)
-        Variable('gameWon) is true
-      EndIf
-      If('idx3 == 'idx6 and 'idx6 == 'idx9)
-        Variable('gameWon) is true
-      EndIf
-
-      If('idx1 == 'idx5 and 'idx5 == 'idx9)
-        Variable('gameWon) is true
-      EndIf
-      If('idx3 == 'idx5 and 'idx5 == 'idx7)
-        Variable('gameWon) is true
-      EndIf
-    Else
-      If('idx1 isNot 1 and 'idx2 isNot 2 and 'idx3 isNot 3)
-        If('idx4 isNot 4 and 'idx5 isNot 5 and 'idx6 isNot 6)
-          If('idx7 isNot 7 and 'idx8 isNot 8 and 'idx9 isNot 9)
-            Variable('endGame) is true
-          EndIf
-        EndIf
-      EndIf
+    If(('idx1 isEquivalentTo 'idx2) and ('idx2 isEquivalentTo 'idx3))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx4 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx6))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx7 isEquivalentTo 'idx8) and ('idx8 isEquivalentTo 'idx9))
+      Variable('gameWon) is true
     EndIf
 
+    If(('idx1 isEquivalentTo 'idx4) and ('idx4 isEquivalentTo 'idx7))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx2 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx8))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx3 isEquivalentTo 'idx6) and ('idx6 isEquivalentTo 'idx9))
+      Variable('gameWon) is true
+    EndIf
+
+    If(('idx1 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx9))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx3 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx7))
+      Variable('gameWon) is true
+    EndIf
+    If(('idx1 isNot 1) and ('idx2 isNot 2) and ('idx3 isNot 3) and ('idx4 isNot 4) and ('idx5 isNot 5) and ('idx6 isNot 6) and ('idx7 isNot 7) and ('idx8 isNot 8) and ('idx9 isNot 9))
+      Variable('endGame) is true
+    EndIf
+
+    EndFunction
+    
+    Function('updateBoard)
+    
     EndFunction
 
     Print("Let's Play Tic-Tac-Toe!!!")
     Print()
-    Variable('count) is 0
     While(true)
-      Variable('count) is 'count plus 1
-      Print('count)
-      If(('endGame == true) or ('gameWon == true))
-        Call('printBoard)
-        If('gameWon isNot true)
+      Call('printBoard)
+      Print("%%%%%%%%%%%%%%%%%%%%%%%%%%")  // DEBUG
+      Print('gameBoard)  // DEBUG
+      Print("%%%%%%%%%%%%%%%%%%%%%%%%%%")  // DEBUG
+      If(('endGame isEquivalentTo true) and ('gameWon isEquivalentTo false))
           Print('gameWinner, " is the victor. It's a draw!")
           Break
           // End
-        Else
-          If('gameWinner == "player")
-            Print("Tic-Tac-Toe!!!!")
-            Print("Congratulations! You have beater the computer and won the game!")
-          EndIf
-          If('gameWinner == "computer")
-            Print("Tic-Tac-Toe!!!!")
-            Print("Sorry. The computer has bested you and has won the game. :(")
-          EndIf
-          Break
-          // End
-        EndIf
       EndIf
-      If('userTurn == 1)
+      If(('gameWon isEquivalentTo true) and ('gameWinner isEquivalentTo "player"))
+        Print("Tic-Tac-Toe!!!!")
+        Print("Congratulations! You have beater the computer and won the game!")
+        Break
+        //End
+      EndIf
+      If(('gameWon isEquivalentTo true) and ('gameWinner isEquivalentTo "computer"))
+        Print("Tic-Tac-Toe!!!!")
+        Print("Sorry. The computer has bested you and has won the game. :(")
+        Break
+        //End
+      EndIf
+      If('userTurn isEquivalentTo 1)
+        Print('gameBoard)  // DEBUG
         Print("User's turn")
-        Call('printBoard)
         Print("Your turn, please type the location you would like to play on. (X)")
         Input('userSelection)
+        Variable('userSelection) is ('userSelection minus 1)
+        Print("userSelection: ", 'userSelection) // DEBUG
         Variable('playLocation) is get('gameBoard, 'userSelection)
-        While('playLocation == 'X' or 'playLocation == 'O')
+        While(('playLocation isEquivalentTo 'X') or ('playLocation isEquivalentTo 'O'))
           Print("You cannot choose that spot, please select another location (X)")
           Input('userSelection)
+          Variable('userSelection) is ('userSelection minus 1)
           Variable('playLocation) is get('gameBoard, 'userSelection)
         Done
+        Print("Before update: ", 'gameBoard) // DEBUG
         Variable('gameBoard) is update('gameBoard, 'playLocation, "X")
+        Print("After update: ", 'gameBoard) // DEBUG
+        Print('gameBoard) // DEBUG
         Call('checkWin)
-        If('gameWon == true)
+        If('gameWon isEquivalentTo true)
           Variable('gameWinner) is "player"
         EndIf
         Print()
         Print("=========================")
         Print()
-        Variable('userTurn) is 0
-      Else
-        Print("Computer Turn")
-        Call('printBoard)
-        Variable('computerSelection) is between(1,9)
+      EndIf
+      If('userTurn isEquivalentTo 0)
+        Print("Computer's Turn")
+        Variable('computerSelection) is between(0,8)
         Variable('playLocation) is get('gameBoard, 'computerSelection)
-        While('playLocation == 'X' or 'playLocation == 'O')
-          Variable('computerSelection) is between(1,9)
-          Variable('playLocation) is get('gameBoard, 'userSelection)
+        While(('playLocation isEquivalentTo 'X') or ('playLocation isEquivalentTo 'O'))
+          Variable('computerSelection) is between(0,8)
+          Variable('playLocation) is get('gameBoard, 'computerSelection)
         Done
         Print("The computer has placed his marker (O) on ", 'playLocation)
+        Print("Before update: ", 'gameBoard)  // DEBUG
         Variable('gameBoard) is update('gameBoard, 'playLocation, "O")
+        Print("After update: ", 'gameBoard) // DEBUG
         Call('checkWin)
-        If('gameWon == true)
+        If('gameWon isEquivalentTo true)
           Variable('gameWinner) is "computer"
         EndIf
         Print()
         Print("=========================")
         Print()
-        Print('userTurn)
+      EndIf
+      If('userTurn isEquivalentTo 1)
+        Variable('userTurn) is 0
+      Else
         Variable('userTurn) is 1
-        Print("End of Computer's Turn")
       EndIf
     Done
     End
