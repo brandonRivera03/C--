@@ -40,6 +40,10 @@ List ('x) includes (1, 2, 3, 4, 5)
 
 #05/02/2016
 I ended up fixing the problem, ignore the text I made earlier. I added some redundant methods and how they are used can be seen in the slides.
+
+#05/03/2016
+I tried creating a Tic-Tac-Toe game for our demo. But as of right now it keeps reporting an error "head of empty list" specifically when I try to change the value of 'userTurn (which switches the user turn and computers turn appropriately). Also I did a crude fix on testing the equality for boolean and symbol values by simply using the == operand as oppose to isEqualTo function (since it only takes Ints and Doubles right now thanks to the anyval binding made within it - not Booleans or other data types). 
+
 ------------------------------------------------
 Make it more easier for a programmer to type/ program
 Adding "Syntactic sugar"
