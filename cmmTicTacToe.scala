@@ -5,12 +5,17 @@ package cmm
 object cmmTicTacToe extends Cminusminus {
   def main(args: Array[String]): Unit = {
     Begin
-    Variable('gameBoard) is List(1,2,3,4,5,6,7,8,9)
+    Variable('gameBoard) is List(0,1,2,3,4,5,6,7,8)
     Variable('playLocation) is 0
     Variable('userTurn) is between(0,1)
     Variable('gameWon) is false
     Variable('gameWinner) is "Nobody"
-    Variable('endGame) is false
+    Variable('counter) is 0
+    
+    Function('incrementCounter)
+    Variable('counter) is 'counter plus 1
+    Variable('counter) is 'counter modulo 9
+    EndFunction
 
     Function('printBoard)
     Variable('idx1) is get('gameBoard, 0)
@@ -70,7 +75,7 @@ object cmmTicTacToe extends Cminusminus {
     If(('idx3 isEquivalentTo 'idx5) and ('idx5 isEquivalentTo 'idx7))
       Variable('gameWon) is true
     EndIf
-    If(('idx1 isNot 1) and ('idx2 isNot 2) and ('idx3 isNot 3) and ('idx4 isNot 4) and ('idx5 isNot 5) and ('idx6 isNot 6) and ('idx7 isNot 7) and ('idx8 isNot 8) and ('idx9 isNot 9))
+    If(('idx1 isNotEquivalentTo 1) and ('idx2 isNotEquivalentTo 2) and ('idx3 isNotEquivalentTo 3) and ('idx4 isNotEquivalentTo 4) and ('idx5 isNotEquivalentTo 5) and ('idx6 isNotEquivalentTo 6) and ('idx7 isNotEquivalentTo 7) and ('idx8 isNotEquivalentTo 8) and ('idx9 isNotEquivalentTo 9))
       Variable('endGame) is true
     EndIf
 
@@ -84,44 +89,31 @@ object cmmTicTacToe extends Cminusminus {
     Print()
     While(true)
       Call('printBoard)
-      Print("%%%%%%%%%%%%%%%%%%%%%%%%%%")  // DEBUG
-      Print('gameBoard)  // DEBUG
-      Print("%%%%%%%%%%%%%%%%%%%%%%%%%%")  // DEBUG
       If(('endGame isEquivalentTo true) and ('gameWon isEquivalentTo false))
           Print('gameWinner, " is the victor. It's a draw!")
           Break
-          // End
       EndIf
       If(('gameWon isEquivalentTo true) and ('gameWinner isEquivalentTo "player"))
         Print("Tic-Tac-Toe!!!!")
         Print("Congratulations! You have beater the computer and won the game!")
         Break
-        //End
       EndIf
       If(('gameWon isEquivalentTo true) and ('gameWinner isEquivalentTo "computer"))
         Print("Tic-Tac-Toe!!!!")
         Print("Sorry. The computer has bested you and has won the game. :(")
         Break
-        //End
       EndIf
       If('userTurn isEquivalentTo 1)
-        Print('gameBoard)  // DEBUG
         Print("User's turn")
         Print("Your turn, please type the location you would like to play on. (X)")
         Input('userSelection)
-        Variable('userSelection) is ('userSelection minus 1)
-        Print("userSelection: ", 'userSelection) // DEBUG
         Variable('playLocation) is get('gameBoard, 'userSelection)
-        While(('playLocation isEquivalentTo 'X') or ('playLocation isEquivalentTo 'O'))
+        While(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
           Print("You cannot choose that spot, please select another location (X)")
           Input('userSelection)
-          Variable('userSelection) is ('userSelection minus 1)
           Variable('playLocation) is get('gameBoard, 'userSelection)
         Done
-        Print("Before update: ", 'gameBoard) // DEBUG
-        Variable('gameBoard) is update('gameBoard, 'playLocation, "X")
-        Print("After update: ", 'gameBoard) // DEBUG
-        Print('gameBoard) // DEBUG
+        Variable('gameBoard) is update('gameBoard, 'userSelection, "X")
         Call('checkWin)
         If('gameWon isEquivalentTo true)
           Variable('gameWinner) is "player"
@@ -134,14 +126,13 @@ object cmmTicTacToe extends Cminusminus {
         Print("Computer's Turn")
         Variable('computerSelection) is between(0,8)
         Variable('playLocation) is get('gameBoard, 'computerSelection)
-        While(('playLocation isEquivalentTo 'X') or ('playLocation isEquivalentTo 'O'))
+        While(('playLocation isEquivalentTo "X") or ('playLocation isEquivalentTo "O"))
+          Print("The computer chose the location: ", 'computerSelection) // DEBUG
           Variable('computerSelection) is between(0,8)
           Variable('playLocation) is get('gameBoard, 'computerSelection)
         Done
         Print("The computer has placed his marker (O) on ", 'playLocation)
-        Print("Before update: ", 'gameBoard)  // DEBUG
-        Variable('gameBoard) is update('gameBoard, 'playLocation, "O")
-        Print("After update: ", 'gameBoard) // DEBUG
+        Variable('gameBoard) is update('gameBoard, 'computerSelection, "O")
         Call('checkWin)
         If('gameWon isEquivalentTo true)
           Variable('gameWinner) is "computer"
