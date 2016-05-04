@@ -3,6 +3,7 @@ package cmm
 import scala.collection.mutable.{ HashMap, Stack }
 import scala.util.Random
 import scala.math.{ min, max }
+import scala.io.StdIn.{ readLine }
 
 class Cminusminus {
   abstract sealed class C_Line
@@ -82,11 +83,22 @@ class Cminusminus {
       current += 1
     }
     def is(v: Function0[Any]): Unit = {
-      lines(current) = Assign(current, (() => binds.set(sym, v())))
+      val val_v = v match {
+        case x: List[Any] => x()
+        case _ => v
+      }
+      val_v match {
+        case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, x)))
+        case _ => lines(current) = Assign(current, (() => binds.set(sym, v())))
+      }
       current += 1
     }
     def is(v: Array[String]): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    def is(v: Symbol): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, binds.any(v))))
       current += 1
     }
 
@@ -277,6 +289,7 @@ class Cminusminus {
 
       case ReadString(_, s: Symbol) => {
         val value: Any = tryInt(readLine())
+        println(value)
         binds.set(s, value)
         gotoLine(line + 1)
       }
@@ -593,13 +606,13 @@ class Cminusminus {
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
-      	val index = idx match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
-      	}
+        val index = idx match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+        }
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
@@ -622,13 +635,13 @@ class Cminusminus {
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
-      	val index = idx match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
-      	}
+        val index = idx match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+        }
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
@@ -647,16 +660,21 @@ class Cminusminus {
   def update(sym : Symbol, idx : Any, v : Any) : Function0[Any] = {
     () => {
       var x: List[Any] = binds.anyList(sym)
+      
+      println("Value of symbol: " + x) // DEBUG
+      println("Value of idx: " + idx) // DEBUG
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
-      	val index = idx match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
-      	}
+        val index = idx match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+        }
+        
+        println("Value of index: " + index) // DEBUG
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
@@ -744,13 +762,13 @@ class Cminusminus {
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
-      	val index = idx match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
-      	}
+        val index = idx match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx is not a valid index")
+        }
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
@@ -773,21 +791,21 @@ class Cminusminus {
 
       /* Type check and convert the value to an Int, if applicable */
       if(x.size != 0) {
-      	val index1 = idx1 match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx1 is not a valid index")
-      	}
-      	
-      	val index2 = idx2 match {
-      		case _i: Int => _i
-      		case _i: Double => _i.asInstanceOf[Int]
-      		case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
-      		case _i: Function0[Any] => _i().asInstanceOf[Int]
-      		case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx2 is not a valid index")
-      	}
+        val index1 = idx1 match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx1 is not a valid index")
+        }
+        
+        val index2 = idx2 match {
+          case _i: Int => _i
+          case _i: Double => _i.asInstanceOf[Int]
+          case _i: Symbol => (binds.anyval(_i)).asInstanceOf[Int]
+          case _i: Function0[Any] => _i().asInstanceOf[Int]
+          case _ => throw new RuntimeException(f"Error: Cannot retrieve element of $sym because $idx1 is not a valid index")
+        }
 
       /* In case the user puts an index outside the size of the list
        * then we take the modulo of it */
@@ -1212,6 +1230,43 @@ class Cminusminus {
         }
     }
 
+    def isEquivalentTo(j: Any): Function0[Boolean] = {
+      () =>
+        {
+          val base_i = i match {
+            case _i: Symbol => binds.any(_i)
+            case _i: Function0[Any] => _i()
+            case _ => i
+          }
+
+          val base_j = j match {
+            case _j: Symbol => binds.any(_j)
+            case _j: Function0[Any] => _j()
+            case _ => j
+          }
+
+          val new_i = base_i match {
+            case _i: Int => _i
+            case _i: Double => _i.asInstanceOf[Int]
+            case _i: Function0[Any] => _i()
+            case bool if bool == true => 1
+            case bool if bool == false => 0
+            case _ => base_i
+          }
+          
+          val new_j = base_j match {
+            case _j: Int => _j
+            case _j: Double => _j.asInstanceOf[Int]
+            case _j: Function0[Any] => _j()
+            case bool if bool == true => 1
+            case bool if bool == false => 0
+            case _ => base_j
+          }
+          
+          new_i == new_j
+        }
+    }    
+
     def isNot(j: Any): Function0[Boolean] = {
       () =>
         {
@@ -1482,11 +1537,11 @@ class Cminusminus {
     }
     
     /* Returns an array of type any. */
-    def arrayval(k: Symbol): Array[Any] = {		
-      any(k) match {		
-        case n: Array[Any] => n		
-        case _ => throw new RuntimeException(f"Variable $k does not exist as type Array")		
-      }		
+    def arrayval(k: Symbol): Array[Any] = {   
+      any(k) match {    
+        case n: Array[Any] => n   
+        case _ => throw new RuntimeException(f"Variable $k does not exist as type Array")   
+      }   
     }
 
     override def toString: String = {
