@@ -84,7 +84,6 @@ class Cminusminus {
     }
     def is(v: Function0[Any]): Unit = {
       val val_v = v()
-//      println("Declaring function " + v + " with value " + val_v)
       val_v match {
         case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, v().asInstanceOf[List[Any]])))
         case x: Int => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Int])))
@@ -92,8 +91,6 @@ class Cminusminus {
         case x: Array[Any] => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Array[Any]])))
         case _ => lines(current) = Assign(current, (() => binds.set(sym, v())))
       }
-//      val val_v = v()
-//      lines(current) = Assign(current, (() => binds.set(sym, val_v)))
       current += 1
     }
     def is(v: Array[String]): Unit = {
@@ -118,11 +115,22 @@ class Cminusminus {
       current += 1
     }
     def equals(v: Function0[Any]): Unit = {
-      lines(current) = Assign(current, (() => binds.set(sym, v())))
+      val val_v = v()
+      val_v match {
+        case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, v().asInstanceOf[List[Any]])))
+        case x: Int => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Int])))
+        case x: Double => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Double])))
+        case x: Array[Any] => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Array[Any]])))
+        case _ => lines(current) = Assign(current, (() => binds.set(sym, v())))
+      }
       current += 1
     }
     def equals(v: Array[String]): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    def equals(v: Symbol): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, binds.any(v))))
       current += 1
     }
     
@@ -139,11 +147,22 @@ class Cminusminus {
       current += 1
     }
     def isDefinedAs(v: Function0[Any]): Unit = {
-      lines(current) = Assign(current, (() => binds.set(sym, v())))
+      val val_v = v()
+      val_v match {
+        case x: List[Any] => lines(current) = Assign(current, (() => binds.setList(sym, v().asInstanceOf[List[Any]])))
+        case x: Int => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Int])))
+        case x: Double => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Double])))
+        case x: Array[Any] => lines(current) = Assign(current, (() => binds.set(sym, v().asInstanceOf[Array[Any]])))
+        case _ => lines(current) = Assign(current, (() => binds.set(sym, v())))
+      }
       current += 1
     }
     def isDefinedAs(v: Array[String]): Unit = {
       lines(current) = Assign(current, (() => binds.set(sym, v)))
+      current += 1
+    }
+    def isDefinedAs(v: Symbol): Unit = {
+      lines(current) = Assign(current, (() => binds.set(sym, binds.any(v))))
       current += 1
     }
   }
